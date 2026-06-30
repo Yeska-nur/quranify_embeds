@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Real-time Quran — text & Tafsir</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-0:#05080e; --bg-1:#04060b; --text-on:#fff;
+    --text-dim:rgba(255,255,255,.26); --text-mid:rgba(255,255,255,.52);
+    --badge-bg:rgba(255,255,255,.07); --badge-tx:rgba(255,255,255,.55);
+    --btn-bg:#fff; --btn-tx:#0a0a0a;
+    --font-display:-apple-system,"SF Pro Display",BlinkMacSystemFont,"Inter",system-ui,sans-serif;
+    --font-body:-apple-system,"SF Pro Text",BlinkMacSystemFont,"Inter",system-ui,sans-serif;
+    --font-arabic:"Amiri","Scheherazade New",serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:var(--font-body);color:var(--text-on);background:var(--bg-0);
+       -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow:hidden}
+
+  .section{position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;
+    background:
+      radial-gradient(125% 95% at -5% 115%, rgba(18,44,165,.72) 0%, rgba(0,21,120,.40) 30%, rgba(5,8,14,0) 62%),
+      radial-gradient(130% 110% at 110% -10%, rgba(8,12,20,1) 0%, rgba(5,8,14,1) 60%),
+      var(--bg-1);}
+  .glow-veil{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(90% 70% at -8% 118%, rgba(18,44,165,.34) 0%, rgba(5,8,14,0) 55%);
+    animation:breathe 12s ease-in-out infinite}
+  @keyframes breathe{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+
+  .grid{position:relative;z-index:2;height:100%;display:grid;
+    grid-template-columns:minmax(300px,.85fr) 1.15fr;align-items:center;gap:64px;
+    width:100%;max-width:1400px;margin:0 auto;padding:0 100px}  /* content 1200 + 100px side gutters */
+
+  .lead{max-width:480px}
+  .lead h1{font-family:var(--font-display);font-weight:600;
+    font-size:clamp(30px,3.4vw,52px);line-height:1.05;letter-spacing:-.022em}
+  .lead .sub{margin-top:16px;font-size:clamp(15px,1.3vw,18px);font-weight:400;color:var(--text-mid)}
+  .cta{margin-top:32px;display:inline-flex;align-items:center;gap:26px;
+    background:var(--btn-bg);color:var(--btn-tx);border:none;border-radius:999px;
+    padding:14px 24px;font-family:var(--font-display);font-size:16px;font-weight:500;
+    text-decoration:none;cursor:pointer;
+    transition:transform .2s cubic-bezier(.22,1,.36,1),box-shadow .2s ease}
+  .cta:hover{transform:scale(1.025);box-shadow:0 12px 40px rgba(20,48,170,.30)}
+  .cta:active{transform:scale(.99)}
+  .cta svg{width:20px;height:20px}
+
+  .viewport{position:relative;height:78vh;overflow:hidden;
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 16%,#000 78%,transparent 100%);
+            mask-image:linear-gradient(to bottom,transparent 0%,#000 16%,#000 78%,transparent 100%)}
+  .stream{position:absolute;top:0;left:0;right:0;padding-right:8px;
+    transition:transform .9s cubic-bezier(.22,1,.36,1);will-change:transform}
+
+  .ayah{padding:26px 0;cursor:pointer;opacity:.32;filter:blur(.4px);transform:scale(.985);
+    transform-origin:right center;
+    transition:opacity .7s ease,transform .7s cubic-bezier(.22,1,.36,1),filter .7s ease}
+  .ayah.is-active{opacity:1;filter:none;transform:scale(1)}
+  .ayah .badge{display:inline-flex;float:right;align-items:center;margin-bottom:14px;
+    padding:4px 12px;border-radius:999px;background:var(--badge-bg);color:var(--badge-tx);
+    font-family:var(--font-display);font-size:13px;font-weight:600}
+  .ayah .arabic{clear:both;direction:rtl;text-align:right;font-family:var(--font-arabic);
+    font-weight:400;font-size:clamp(24px,2.4vw,38px);line-height:2.0}
+  .ayah .arabic .aw{color:rgba(255,255,255,.42);transition:color .35s ease,text-shadow .35s ease}
+  .ayah.is-active .arabic .aw.lit{color:var(--text-on);
+    text-shadow:0 0 26px rgba(255,255,255,.32),0 0 60px rgba(40,80,210,.22)}
+  .ayah:not(.is-active) .arabic .aw{color:rgba(255,255,255,.42)}
+  .ayah .trans{margin-top:12px;text-align:left;font-family:var(--font-body);
+    font-size:clamp(15px,1.35vw,20px);font-weight:500;line-height:1.45;letter-spacing:-.01em}
+  .ayah .trans .w{color:var(--text-dim);transition:color .35s ease,text-shadow .35s ease}
+  .ayah.is-active .trans .w.lit{color:var(--text-on);text-shadow:0 0 18px rgba(255,255,255,.18)}
+  .ayah:not(.is-active) .trans .w{color:var(--text-dim)}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:900px){
+    body{overflow:auto}
+    .section{height:auto;min-height:100vh;padding:52px 0 84px}
+    .grid{grid-template-columns:1fr;gap:24px;padding:0 22px;align-items:start}
+    .lead{max-width:100%}
+    .lead h1{font-size:clamp(27px,7.6vw,40px)}
+    .lead .sub{font-size:16px;margin-top:12px}
+    .cta{margin-top:24px}
+    .viewport{height:56vh;min-height:340px;
+      -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 12%,#000 84%,transparent 100%);
+              mask-image:linear-gradient(to bottom,transparent 0%,#000 12%,#000 84%,transparent 100%)}
+    .ayah{padding:16px 0}
+    .ayah .arabic{font-size:clamp(22px,6.6vw,30px);line-height:1.95}
+    .ayah .trans{font-size:clamp(15px,4.2vw,17px)}
+    .nowbar{left:22px;bottom:18px}
+  }
+  @media (max-width:480px){
+    .lead h1{font-size:clamp(24px,8vw,34px)}
+    .viewport{height:54vh}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .stream{transition:transform .001s linear}
+    .ayah,.ayah .arabic,.ayah .trans .w{transition-duration:.001s}
+    .glow-veil{animation:none}
+  }
+</style>
+</head>
+<body>
+  <section class="section" aria-label="Real-time Quran reader">
+    <div class="glow-veil" aria-hidden="true"></div>
+    <div class="grid">
+      <div class="lead">
+        <h1>Real-time Quran<br>text&amp;Tafsir</h1>
+        <p class="sub">Listen, read and reflect</p>
+        <a class="cta" href="https://quranify.onelink.me/oEHM/901blkof?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPOTM2NjE5NzQzMzkyNDU5AAGn7nrKIaT9efeLwB9DOgPXdteJZo9TYGujAXaH7qfkiDh5G8qcZLhJt3wXq24_aem_HLVS5o5ko10ma4LcLZ_xiw" target="_blank" rel="noopener noreferrer">
+          Get Started
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="4" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline>
+          </svg>
+        </a>
+      </div>
+      <div class="viewport"><div class="stream" id="stream" aria-live="polite"></div></div>
+    </div>
+  </section>
+
+<script>
+  /* Real Surah Al-Baqarah (Uthmani) + Yusuf Ali translation (public domain).
+     Source: risan/quran-json (Arabic) + fawazahmed0/quran-api (Yusuf Ali).
+     `dur` is timer-based (∝ word count). To sync to real recitation audio,
+     add an <audio> tag, give each ayah a start time, and drive activate()
+     + the word sweep from the audio 'timeupdate' event. */
+  const AYAT = [
+  {
+    "ref": "2:1",
+    "ar": "الٓمٓ",
+    "tr": "Alif. Lam. Mim."
+  },
+  {
+    "ref": "2:2",
+    "ar": "ذَٰلِكَ ٱلۡكِتَٰبُ لَا رَيۡبَۛ فِيهِۛ هُدٗى لِّلۡمُتَّقِينَ",
+    "tr": "This is the Book; in it is guidance sure, without doubt, to those who fear Allah"
+  },
+  {
+    "ref": "2:3",
+    "ar": "ٱلَّذِينَ يُؤۡمِنُونَ بِٱلۡغَيۡبِ وَيُقِيمُونَ ٱلصَّلَوٰةَ وَمِمَّا رَزَقۡنَٰهُمۡ يُنفِقُونَ",
+    "tr": "Who believe in the Unseen, are steadfast in prayer, and spend out of what We have provided for them"
+  },
+  {
+    "ref": "2:4",
+    "ar": "وَٱلَّذِينَ يُؤۡمِنُونَ بِمَآ أُنزِلَ إِلَيۡكَ وَمَآ أُنزِلَ مِن قَبۡلِكَ وَبِٱلۡأٓخِرَةِ هُمۡ يُوقِنُونَ",
+    "tr": "And who believe in the Revelation sent to thee, and sent before thy time, and (in their hearts) have the assurance of the Hereafter"
+  },
+  {
+    "ref": "2:5",
+    "ar": "أُوْلَـٰٓئِكَ عَلَىٰ هُدٗى مِّن رَّبِّهِمۡۖ وَأُوْلَـٰٓئِكَ هُمُ ٱلۡمُفۡلِحُونَ",
+    "tr": "They are on (true) guidance, from their Lord, and it is these who will prosper"
+  },
+  {
+    "ref": "2:6",
+    "ar": "إِنَّ ٱلَّذِينَ كَفَرُواْ سَوَآءٌ عَلَيۡهِمۡ ءَأَنذَرۡتَهُمۡ أَمۡ لَمۡ تُنذِرۡهُمۡ لَا يُؤۡمِنُونَ",
+    "tr": "As to those who reject Faith, it is the same to them whether thou warn them or do not warn them; they will not believe"
+  },
+  {
+    "ref": "2:7",
+    "ar": "خَتَمَ ٱللَّهُ عَلَىٰ قُلُوبِهِمۡ وَعَلَىٰ سَمۡعِهِمۡۖ وَعَلَىٰٓ أَبۡصَٰرِهِمۡ غِشَٰوَةٞۖ وَلَهُمۡ عَذَابٌ عَظِيمٞ",
+    "tr": "Allah hath set a seal on their hearts and on their hearing, and on their eyes is a veil; great is the penalty they (incur)"
+  },
+  {
+    "ref": "2:8",
+    "ar": "وَمِنَ ٱلنَّاسِ مَن يَقُولُ ءَامَنَّا بِٱللَّهِ وَبِٱلۡيَوۡمِ ٱلۡأٓخِرِ وَمَا هُم بِمُؤۡمِنِينَ",
+    "tr": "Of the people there are some who say: \"We believe in Allah and the Last Day;\" but they do not (really) believe"
+  },
+  {
+    "ref": "2:9",
+    "ar": "يُخَٰدِعُونَ ٱللَّهَ وَٱلَّذِينَ ءَامَنُواْ وَمَا يَخۡدَعُونَ إِلَّآ أَنفُسَهُمۡ وَمَا يَشۡعُرُونَ",
+    "tr": "Fain would they deceive Allah and those who believe, but they only deceive themselves, and realise (it) not"
+  },
+  {
+    "ref": "2:10",
+    "ar": "فِي قُلُوبِهِم مَّرَضٞ فَزَادَهُمُ ٱللَّهُ مَرَضٗاۖ وَلَهُمۡ عَذَابٌ أَلِيمُۢ بِمَا كَانُواْ يَكۡذِبُونَ",
+    "tr": "In their hearts is a disease; and Allah has increased their disease: And grievous is the penalty they (incur), because they are false (to themselves)"
+  },
+  {
+    "ref": "2:11",
+    "ar": "وَإِذَا قِيلَ لَهُمۡ لَا تُفۡسِدُواْ فِي ٱلۡأَرۡضِ قَالُوٓاْ إِنَّمَا نَحۡنُ مُصۡلِحُونَ",
+    "tr": "When it is said to them: \"Make not mischief on the earth,\" they say: \"Why, we only Want to make peace"
+  },
+  {
+    "ref": "2:12",
+    "ar": "أَلَآ إِنَّهُمۡ هُمُ ٱلۡمُفۡسِدُونَ وَلَٰكِن لَّا يَشۡعُرُونَ",
+    "tr": "Of a surety, they are the ones who make mischief, but they realise (it) not"
+  },
+  {
+    "ref": "2:13",
+    "ar": "وَإِذَا قِيلَ لَهُمۡ ءَامِنُواْ كَمَآ ءَامَنَ ٱلنَّاسُ قَالُوٓاْ أَنُؤۡمِنُ كَمَآ ءَامَنَ ٱلسُّفَهَآءُۗ أَلَآ إِنَّهُمۡ هُمُ ٱلسُّفَهَآءُ وَلَٰكِن لَّا يَعۡلَمُونَ",
+    "tr": "When it is said to them: \"Believe as the others believe:\" They say: \"Shall we believe as the fools believe?\" Nay, of a surety they are the fools, but they do not know"
+  },
+  {
+    "ref": "2:14",
+    "ar": "وَإِذَا لَقُواْ ٱلَّذِينَ ءَامَنُواْ قَالُوٓاْ ءَامَنَّا وَإِذَا خَلَوۡاْ إِلَىٰ شَيَٰطِينِهِمۡ قَالُوٓاْ إِنَّا مَعَكُمۡ إِنَّمَا نَحۡنُ مُسۡتَهۡزِءُونَ",
+    "tr": "When they meet those who believe, they say: \"We believe;\" but when they are alone with their evil ones, they say: \"We are really with you: We (were) only jesting"
+  },
+  {
+    "ref": "2:15",
+    "ar": "ٱللَّهُ يَسۡتَهۡزِئُ بِهِمۡ وَيَمُدُّهُمۡ فِي طُغۡيَٰنِهِمۡ يَعۡمَهُونَ",
+    "tr": "Allah will throw back their mockery on them, and give them rope in their trespasses; so they will wander like blind ones (To and fro)"
+  },
+  {
+    "ref": "2:16",
+    "ar": "أُوْلَـٰٓئِكَ ٱلَّذِينَ ٱشۡتَرَوُاْ ٱلضَّلَٰلَةَ بِٱلۡهُدَىٰ فَمَا رَبِحَت تِّجَٰرَتُهُمۡ وَمَا كَانُواْ مُهۡتَدِينَ",
+    "tr": "These are they who have bartered Guidance for error: But their traffic is profitless, and they have lost true direction"
+  }
+];
+
+  const BASE_MS=1400, PER_WORD_MS=360, SWEEP_TAIL=0.18;
+  const streamEl=document.getElementById('stream');
+  const viewport=streamEl.parentElement;
+  const ayahEls=[];
+  let active=0, advanceTimer=null, sweepTimers=[];
+
+  AYAT.forEach((a,i)=>{
+    const el=document.createElement('div'); el.className='ayah'; el.dataset.index=i;
+    const arWords=a.ar.split(' ').map(w=>`<span class="aw">${w}</span>`).join(' ');
+    const words=a.tr.split(' ').map(w=>`<span class="w">${w}</span>`).join(' ');
+    el.innerHTML=`<span class="badge">${a.ref}</span><div class="arabic">${arWords}</div><div class="trans">${words}</div>`;
+    el.addEventListener('click',()=>goTo(i));
+    streamEl.appendChild(el); ayahEls.push(el);
+  });
+
+  const durationFor=(i)=>BASE_MS+AYAT[i].tr.split(' ').length*PER_WORD_MS;
+  const clearSweep=()=>{ sweepTimers.forEach(t=>clearTimeout(t)); sweepTimers=[]; };
+
+  function positionStream(){
+    const el=ayahEls[active];
+    streamEl.style.transform=`translateY(${viewport.clientHeight*0.38-(el.offsetTop+el.offsetHeight/2)}px)`;
+  }
+  function sweepGroup(words,dur){ if(!words.length)return; const step=dur/words.length;
+    words.forEach((w,k)=>sweepTimers.push(setTimeout(()=>w.classList.add('lit'),step*k))); }
+  function runSweep(i){ clearSweep(); const el=ayahEls[i]; const dur=durationFor(i)*(1-SWEEP_TAIL);
+    sweepGroup(el.querySelectorAll('.arabic .aw'),dur); sweepGroup(el.querySelectorAll('.trans .w'),dur); }
+  function activate(i){
+    ayahEls.forEach((el,k)=>{ el.classList.toggle('is-active',k===i);
+      if(k!==i) el.querySelectorAll('.trans .w, .arabic .aw').forEach(w=>w.classList.remove('lit')); });
+    active=i; positionStream(); runSweep(i);
+  }
+  function goTo(i){ activate(((i%AYAT.length)+AYAT.length)%AYAT.length); scheduleNext(); }
+  function scheduleNext(){ clearTimeout(advanceTimer);
+    advanceTimer=setTimeout(()=>goTo(active+1), durationFor(active)); }
+
+  let rAF; window.addEventListener('resize',()=>{ cancelAnimationFrame(rAF); rAF=requestAnimationFrame(positionStream); });
+  function start(){ activate(0); scheduleNext(); }
+  if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(()=>requestAnimationFrame(start)); }
+  else { window.addEventListener('load',()=>requestAnimationFrame(start)); }
+</script>
+</body>
+</html>
