@@ -70,7 +70,7 @@
         <h2><span id="count">100</span>+ Reciters</h2>
         <p>Choose your favorite<br>or be the someone's favorite</p>
       </div>
-      <button class="btn" type="button">Join as a reciter
+      <button class="btn" type="button" id="ctaBtn">Join as a reciter
         <svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="1" y1="6" x2="22" y2="6"/><polyline points="17 1.5 22.5 6 17 10.5"/></svg>
       </button>
     </div>
@@ -121,16 +121,15 @@
   }
 
   const countEl=document.getElementById('count');
-  function countUp(){
-    const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-    if(reduce){ countEl.textContent='100'; return; }
-    const t0=performance.now(),dur=1200,ease=x=>1-Math.pow(1-x,3);
-    (function step(n){const p=Math.min(1,(n-t0)/dur);countEl.textContent=Math.round(ease(p)*100);if(p<1)requestAnimationFrame(step);})(t0);
-  }
+  countEl.textContent='100';
 
   let rt;
   window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(build,200); });
-  function start(){ build(); countUp(); }
-  if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(start);} else { window.addEventListener('load',start);}
+  build();
+
+  // ask the parent page (this embed lives in a cross-origin iframe) to navigate to /reciters
+  document.getElementById('ctaBtn').addEventListener('click',()=>{
+    try{ window.parent.postMessage({type:'quranify-navigate', url:'https://quranify.pro/reciters'}, '*'); }catch(e){}
+  });
 </script>
 </body></html>
