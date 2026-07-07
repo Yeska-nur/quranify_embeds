@@ -102,12 +102,12 @@
       <div class="lead">
         <h1>Real-time Quran<br>text&amp;Tafsir</h1>
         <p class="sub">Listen, read and reflect</p>
-        <a class="cta" href="https://quranify.pro/#download" target="_top" rel="noopener noreferrer">
+        <button class="cta" type="button" id="ctaBtn">
           Get Started
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="4" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline>
           </svg>
-        </a>
+        </button>
       </div>
       <div class="viewport"><div class="stream" id="stream" aria-live="polite"></div></div>
     </div>
@@ -235,6 +235,11 @@
   function start(){ activate(0); scheduleNext(); }
   if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(()=>requestAnimationFrame(start)); }
   else { window.addEventListener('load',()=>requestAnimationFrame(start)); }
+
+  // ask the parent page (this embed lives in a cross-origin iframe) to smooth-scroll to #download
+  document.getElementById('ctaBtn').addEventListener('click',()=>{
+    try{ window.parent.postMessage({type:'quranify-scroll', target:'download'}, '*'); }catch(e){}
+  });
 </script>
 </body>
 </html>
