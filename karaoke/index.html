@@ -6,7 +6,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{ --bg:#fff; --gap:12px; --tile:clamp(128px,12.5vw,168px);
+  :root{ --bg:#fff; --gap:12px; --tile:clamp(150px,15vw,196px);
          --font:"Inter",-apple-system,BlinkMacSystemFont,system-ui,sans-serif; }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
@@ -30,14 +30,14 @@
   /* card shown immediately, no entrance animation, no glow */
   .card{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);
     width:fit-content;max-width:calc(100% - 40px);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;
     padding:40px 64px;border-radius:24px;
     background:rgba(255,255,255,.04);backdrop-filter:blur(33px);-webkit-backdrop-filter:blur(33px);
     box-shadow:0 4px 16px rgba(0,0,0,.08);text-align:center}
-  .card .heading{display:flex;flex-direction:column;align-items:center;gap:20px;width:100%}
-  .card h2{font-size:32px;font-weight:500;letter-spacing:-.32px;line-height:1.6;white-space:nowrap;
+  .card .heading{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
+  .card h2{font-size:32px;font-weight:500;letter-spacing:-.32px;line-height:1.3;white-space:nowrap;
     font-variant-numeric:tabular-nums;text-shadow:0 1px 10px rgba(0,0,0,.22)}
-  .card p{font-size:18px;font-weight:400;line-height:28px;opacity:.6;white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,.18)}
+  .card p{font-size:18px;font-weight:400;line-height:1.4;opacity:.6;white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,.18)}
   .card .btn{display:inline-flex;align-items:center;justify-content:center;gap:50px;width:235px;
     padding:15px 20px;border:none;border-radius:980px;background:#fff;color:#000;font-family:var(--font);
     font-size:16px;font-weight:400;cursor:pointer;white-space:nowrap;
@@ -47,17 +47,17 @@
   .card .btn svg{width:24px;height:12px;flex:none}
 
   @media (max-width:760px){
-    :root{ --tile:clamp(96px,29vw,124px); --gap:10px; }
+    :root{ --tile:clamp(110px,32vw,140px); --gap:10px; }
     .section{min-height:100vh}
-    .card{padding:28px 30px;gap:18px;border-radius:22px;max-width:calc(100% - 28px)}
-    .card .heading{gap:12px}
+    .card{padding:28px 30px;gap:22px;border-radius:22px;max-width:calc(100% - 28px)}
+    .card .heading{gap:8px}
     .card h2{font-size:24px;white-space:nowrap}
-    .card p{font-size:14.5px;line-height:21px;white-space:normal}
+    .card p{font-size:14.5px;line-height:1.4;white-space:normal}
     .card .btn{width:auto;gap:14px;padding:13px 22px;font-size:15px;white-space:nowrap}
     .marquee{-webkit-mask-image:linear-gradient(to right,transparent,#000 4%,#000 96%,transparent);
              mask-image:linear-gradient(to right,transparent,#000 4%,#000 96%,transparent)}
   }
-  @media (max-width:400px){ :root{ --tile:clamp(82px,30vw,108px) } .card h2{font-size:22px} .card .btn{padding:12px 18px;font-size:14px;gap:10px} }
+  @media (max-width:400px){ :root{ --tile:clamp(92px,32vw,120px) } .card h2{font-size:22px} .card .btn{padding:12px 18px;font-size:14px;gap:10px} }
 
   @media (prefers-reduced-motion:reduce){ .m-track{animation:none} }
 </style></head>
@@ -92,9 +92,24 @@
   const marquee=document.getElementById('marquee');
   const DURS=[88,108,76,98,120,82,104];
 
+  function tilePx(){
+    const probe=document.createElement('div'); probe.style.width='var(--tile)';
+    probe.style.position='absolute'; probe.style.visibility='hidden'; document.body.appendChild(probe);
+    const w=probe.getBoundingClientRect().width||160; probe.remove(); return w;
+  }
+  function gapPx(){ return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap'))||12; }
+
+  // compute enough rows so the marquee field always fully covers the section height,
+  // eliminating the blank strip at top/bottom regardless of viewport height
+  function rowsNeeded(){
+    const rowH = tilePx() + gapPx();
+    const sectionH = document.querySelector('.section').getBoundingClientRect().height || window.innerHeight;
+    return Math.max(3, Math.ceil(sectionH / rowH) + 1);
+  }
+
   function build(){
     marquee.innerHTML='';
-    const rows=3;
+    const rows=rowsNeeded();
     for(let r=0;r<rows;r++){
       const row=document.createElement('div'); row.className='m-row';
       const track=document.createElement('div'); track.className='m-track'+(r%2?' rev':'');
