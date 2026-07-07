@@ -43,10 +43,7 @@
   .cta{margin-top:32px;display:inline-flex;align-items:center;gap:26px;
     background:var(--btn-bg);color:var(--btn-tx);border:none;border-radius:999px;
     padding:14px 24px;font-family:var(--font-display);font-size:16px;font-weight:500;
-    text-decoration:none;cursor:pointer;
-    transition:transform .2s cubic-bezier(.22,1,.36,1),box-shadow .2s ease}
-  .cta:hover{transform:scale(1.025);box-shadow:0 12px 40px rgba(20,48,170,.30)}
-  .cta:active{transform:scale(.99)}
+    text-decoration:none;cursor:pointer}
   .cta svg{width:20px;height:20px}
   .viewport{position:relative;height:78vh;overflow:hidden;
     -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 16%,#000 78%,transparent 100%);
@@ -73,24 +70,23 @@
   .ayah:not(.is-active) .trans .w{color:var(--text-dim)}
   /* ---------- Responsive ---------- */
   @media (max-width:900px){
-    body{overflow:auto}
-    .section{height:auto;min-height:100vh;padding:52px 0 84px}
-    .grid{grid-template-columns:1fr;gap:24px;padding:0 22px;align-items:start}
+    .section{height:100%;min-height:0;padding:28px 0}
+    .grid{grid-template-columns:1fr;gap:20px;padding:0 22px;align-items:center;height:100%}
     .lead{max-width:100%}
     .lead h1{font-size:clamp(27px,7.6vw,40px)}
     .lead .sub{font-size:16px;margin-top:12px}
-    .cta{margin-top:24px}
-    .viewport{height:56vh;min-height:340px;
+    .cta{margin-top:20px}
+    .viewport{height:50%;min-height:220px;
       -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 12%,#000 84%,transparent 100%);
               mask-image:linear-gradient(to bottom,transparent 0%,#000 12%,#000 84%,transparent 100%)}
-    .ayah{padding:16px 0}
-    .ayah .arabic{font-size:clamp(22px,6.6vw,30px);line-height:1.95}
-    .ayah .trans{font-size:clamp(15px,4.2vw,17px)}
+    .ayah{padding:14px 0}
+    .ayah .arabic{font-size:clamp(20px,6vw,28px);line-height:1.9}
+    .ayah .trans{font-size:clamp(14px,4vw,16px)}
     .nowbar{left:22px;bottom:18px}
   }
   @media (max-width:480px){
     .lead h1{font-size:clamp(24px,8vw,34px)}
-    .viewport{height:54vh}
+    .viewport{height:46%;min-height:180px}
   }
   @media (prefers-reduced-motion:reduce){
     .stream{transition:transform .001s linear}
@@ -106,7 +102,7 @@
       <div class="lead">
         <h1>Real-time Quran<br>text&amp;Tafsir</h1>
         <p class="sub">Listen, read and reflect</p>
-        <a class="cta" href="https://quranify.onelink.me/oEHM/901blkof?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPOTM2NjE5NzQzMzkyNDU5AAGn7nrKIaT9efeLwB9DOgPXdteJZo9TYGujAXaH7qfkiDh5G8qcZLhJt3wXq24_aem_HLVS5o5ko10ma4LcLZ_xiw" target="_blank" rel="noopener noreferrer">
+        <a class="cta" href="https://quranify.pro/#download" target="_top" rel="noopener noreferrer">
           Get Started
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="4" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline>
